@@ -38,7 +38,7 @@ class Jogadores {
     constructor(arraySize) {
         this.arrayJogadores = new Array();
         for (let index = 0; index < arraySize; index++) {
-            const jogadorBudget = 100;
+            const jogadorBudget = 10;
             this.arrayJogadores.push(new Jogador(jogadorBudget, index));
             console.log("Jogador" + index + " inicializado com " + jogadorBudget + " de bugdet");
         }
@@ -116,24 +116,25 @@ function createRoleta(arrayJogadores) {
         if (numeroRoleta !== 0) {
             const roleta = new Roleta(numeroRoleta);
             console.log("A roleta foi iniciada.");
-            const banca = new Banca(1000);
+            const banca = new Banca(100);
             console.log("Banca inicializada com " + banca.getBudget());
             const arrayJogadoresNew = arrayJogadores.getJogadores();
+            var numeroRolado;
             createJogada(roleta, banca, arrayJogadoresNew, 0);
         }
     });
 }
 
 // fazer a jogada (loop)
+
 function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
     // Se passou por todos jogadores, fala quem ganhou, quanto e volta pro primeiro
     if (arrayJogadores.length <= jogadorNowCodigo) {
-        console.log('A roleta girou o número', numeroRoleta);
+        console.log('A roleta girou o número', numeroRolado);
         // Diz quem ganhou e se ganhou
         for (let index = 0; index < arrayJogadores.length; index++) {
             var jogadorNow = arrayJogadores[index];
-
             console.log("Jogador" + jogadorNow.getCodigo() +" jogou "+jogadorNow.getAposta()+" e "+jogadorNow.getResultado () +". Tem agora " +
              + jogadorNow.getBudget());
         }
@@ -141,24 +142,32 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         jogadorNowCodigo = 0;
     }
     // verificaçoes se jogadores ou banca perderam
-    if (banca.getBudget <= 0) {
+    if (banca.getBudget() <= 0) {
         console.log("A banca quebrou! Parabéns!");
+        return;
     }
 
     // passar por todos os jogadores e ver se alguem perdeu, se perdeu retirar do arrayJogadoress
     for (let index = 0; index < arrayJogadores.length; index++) {
         var jogador = arrayJogadores[index];
-        if (jogador.getBudget <= 0) {
+        if (jogador.getBudget() <= 0) {
             console.log("O jogador"+jogador.getCodigo() +" quebrou!");
             arrayJogadores.splice(jogador.getCodigo(), 1);
-            console.log(arrayJogadores);
+            jogadorNowCodigo = jogadorNowCodigo + 1;
+            createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
         }
+    }
+
+    // verificar se todos jogadores perderam 
+    if (arrayJogadores.length == 0) {
+        console.log('Todos os jogadores perderam!');
+        return;
     }
 
     // É inicio da rodada
     if (jogadorNowCodigo == 0) {
         // Rodar roleta para a rodada
-        const numeroRoleta = roleta.rodada();
+        numeroRolado = roleta.rodada();
     }
 
     // Faz as perguntas do que o jogador quer jogar
@@ -169,8 +178,8 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         // PAR OU IMPAR
         if (answer == 'par' || answer == 'impar') {
             arrayJogadores[jogadorNowCodigo].jogada(answer);
-            //numeroRoleta = roleta.rodada();
-            if (numeroRoleta % 2 === 0) {
+            //numeroRolado = roleta.rodada();
+            if (numeroRolado % 2 === 0) {
                 paridadeRoleta = 'par';
             } else {
                 paridadeRoleta = 'impar';
@@ -184,22 +193,22 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
                 // Calcular bugdet da banca
                 banca.setBudget(banca.getBudget() - 1);
-                jogadorNow
                 jogadorNowCodigo = jogadorNowCodigo + 1;
                 createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
             } else {
                 // Calcular bugdet da banca
                 banca.setBudget(banca.getBudget() + 1);
-                jogadorNowCodigo = jogadorNowCodigo + 1;
+                
                 arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
+                jogadorNowCodigo = jogadorNowCodigo + 1;
                 createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
             }
         }
         // VERMELHO OU PRETO
         else if (answer == 'vermelho' || answer == 'preto') {
             arrayJogadores[jogadorNowCodigo].jogada(answer);
-            //numeroRoleta = roleta.rodada();
-            if (numeroRoleta % 2 === 0) {
+            //numeroRolado = roleta.rodada();
+            if (numeroRolado % 2 === 0) {
                 paridadeRoleta = 'Par';
             } else {
                 paridadeRoleta = 'Impar';
@@ -259,11 +268,11 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         // ALTOS OU BAIXOS
         else if (answer == 'altos' || answer == 'baixos') {
             arrayJogadores[jogadorNowCodigo].jogada(answer);
-            //numeroRoleta = roleta.rodada();
+            //numeroRolado = roleta.rodada();
             numeroTotalRoleta = roleta.getNumero();
             numeroTotalRoleta = numeroTotalRoleta / 2;
             if (answer == 'altos') {
-                if (numeroTotalRoleta > numeroRoleta) {
+                if (numeroTotalRoleta > numeroRolado) {
                     // perdeu playboy
                     arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
 
@@ -288,7 +297,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
                 }
             } else {
-                if (numeroTotalRoleta > numeroRoleta) {
+                if (numeroTotalRoleta > numeroRolado) {
                     // ganho playboy
                     arrayJogadores[jogadorNowCodigo].setResultado('ganhou');
 
@@ -326,10 +335,10 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
             }
             if (count == 0) {
                 arrayJogadores[jogadorNowCodigo].jogada(allNumbers, allNumbers.length);
-                //numeroRoleta = roleta.rodada();
+                //numeroRolado = roleta.rodada();
                 var quantidade_perdida = 0;
                 for (ind = 0; ind < allNumbers.length; ind++) {
-                    if (Number(allNumbers[ind]) === numeroRoleta) {
+                    if (Number(allNumbers[ind]) === numeroRolado) {
                         // ganho playboy
                         arrayJogadores[jogadorNowCodigo].setResultado('ganhou');
 
