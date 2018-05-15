@@ -77,8 +77,8 @@ class Jogador {
   getQttPassouJogada(){
     return this.qttPassouJogada;
   }
-  setQttPassouJogada(valor){
-    return this.qttPassouJogada+valor;
+  setQttPassouJogada(){
+    return this.qttPassouJogada++;
   }
   zerarQttPassouJogada(){
     this.qttPassouJogada = 0;
@@ -88,7 +88,7 @@ class Jogador {
   jogada(aposta, quantidade) {
     if (typeof quantidade !== 'undefined') {
       this.budget = this.budget - quantidade;
-    } else {
+    } else if (aposta != "passar") {
       this.budget = this.budget - 1;
     }
     this.aposta = aposta;
@@ -141,11 +141,12 @@ function createRoleta(arrayJogadores) {
 }
 
 // fazer a jogada (loop)
+var passException = 'nao';
 
 function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
   // Se passou por todos jogadores, fala quem ganhou, quanto e volta pro primeiro
-  if (arrayJogadores.length <= jogadorNowCodigo) {
+  if (arrayJogadores.length <= jogadorNowCodigo && passException == 'nao' ) {
     console.log('A roleta girou o número', numeroRolado);
     // Diz quem ganhou e se ganhou
     for (let index = 0; index < arrayJogadores.length; index++) {
@@ -342,13 +343,20 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
         }
       }
-    }
+
       // PASSAR JOGADA
-    // } else if (answer == 'passar'){
-    //   console.log("Você não pode mais passar!!");
-    //
-    //   arrayJogadores[jogadorNowCodigo].setQttPassouJogada(1);
-    //   }
+    } else if (answer == 'passar'){
+      arrayJogadores[jogadorNowCodigo].setQttPassouJogada();
+      if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() > 3){
+        console.log("Você não pode mais passar!!");
+        createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
+      }
+      if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() <= 3){
+        console.log("O jogador "+jogadorNowCodigo+" passou a jogada!");
+        jogadorNowCodigo = jogadorNowCodigo + 1;
+        createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
+      }
+    }
 
     // NUMEROS UNICOS e INFO INVÁLIDA
     else {
