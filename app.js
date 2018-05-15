@@ -40,9 +40,10 @@ class Jogadores {
     for (let index = 0; index < arraySize; index++) {
       const jogadorBudget = 10;
       this.arrayJogadores.push(new Jogador(jogadorBudget, index));
-      console.log("Jogador" + index + " inicializado com " + jogadorBudget + " de bugdet");
+      console.log("Jogador" + index + " inicializado com " + jogadorBudget + " de bugdet \n");
     }
   }
+
   getJogadores() {
     return this.arrayJogadores;
   }
@@ -103,9 +104,9 @@ var rl = readline.createInterface({
 rl.write("Roleta:\n");
 
 function createJogadores() {
-  rl.question("Quantos jogadores vão jogar? ", function (answer) {
+  rl.question("Quantos jogadores vão jogar? \n", function (answer) {
     if (answer <= 0){
-      console.log("Não há jogadores para iniciar o jogo.")
+      console.log("Não há jogadores para iniciar o jogo.\n")
       process.exit();
     }
     var arrayJogadores = new Jogadores(answer);
@@ -116,7 +117,7 @@ function createJogadores() {
 
 function createRoleta(arrayJogadores) {
 
-  rl.question("Qual vai ser o tipo de roleta?(1 - americana, 2 - europeia, 3 - francesa) ", function (answer) {
+  rl.question("Qual vai ser o tipo de roleta?(1 - americana, 2 - europeia, 3 - francesa) \n", function (answer) {
     if (answer == 1) {
       numeroRoleta = 10;
     } else if (answer == 2) {
@@ -125,14 +126,14 @@ function createRoleta(arrayJogadores) {
       numeroRoleta = 10;
     } else {
       numeroRoleta = 0;
-      console.log("Você precisa entrar uma informação válida!");
+      console.log("Você precisa entrar uma informação válida!\n");
       createRoleta();
     }
     if (numeroRoleta !== 0) {
       const roleta = new Roleta(numeroRoleta);
       console.log("A roleta foi iniciada.");
       const banca = new Banca(100);
-      console.log("Banca inicializada com " + banca.getBudget());
+      console.log("Banca inicializada com " + banca.getBudget() + "\n");
       const arrayJogadoresNew = arrayJogadores.getJogadores();
       var numeroRolado;
       createJogada(roleta, banca, arrayJogadoresNew, 0);
@@ -141,25 +142,29 @@ function createRoleta(arrayJogadores) {
 }
 
 // fazer a jogada (loop)
-var passException = 'nao';
 
 function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
   // Se passou por todos jogadores, fala quem ganhou, quanto e volta pro primeiro
-  if (arrayJogadores.length <= jogadorNowCodigo && passException == 'nao' ) {
-    console.log('A roleta girou o número', numeroRolado);
+  if (arrayJogadores.length <= jogadorNowCodigo) {
+    console.log('A roleta girou o número', numeroRolado + "\n");
     // Diz quem ganhou e se ganhou
     for (let index = 0; index < arrayJogadores.length; index++) {
       var jogadorNow = arrayJogadores[index];
-      console.log("Jogador" + jogadorNow.getCodigo() +" jogou "+jogadorNow.getAposta()+" e "+jogadorNow.getResultado () +". Tem agora " +
-      + jogadorNow.getBudget());
+      if(jogadorNow.getQttPassouJogada() == 0){
+        console.log("Jogador" + jogadorNow.getCodigo() +" jogou "+jogadorNow.getAposta()+" e "+jogadorNow.getResultado () +". Tem agora " +
+        + jogadorNow.getBudget() + "\n");
+      }
+      if(jogadorNow.getQttPassouJogada() > 0){
+        console.log("Jogador" + jogadorNow.getCodigo() + " passou esse round. \n");
+      }
     }
-    console.log("Agora a banca tem " + banca.getBudget());
+    console.log("Agora a banca tem " + banca.getBudget() + "\n");
     jogadorNowCodigo = 0;
   }
   // verificaçoes se jogadores ou banca perderam
   if (banca.getBudget() <= 0) {
-    console.log("A banca quebrou! Parabéns!");
+    console.log("A banca quebrou! Parabéns! \n");
     return;
   }
 
@@ -167,7 +172,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   for (let index = 0; index < arrayJogadores.length; index++) {
     var jogador = arrayJogadores[index];
     if (jogador.getBudget() <= 0) {
-      console.log("O jogador"+jogador.getCodigo() +" quebrou!");
+      console.log("O jogador"+jogador.getCodigo() +" quebrou! \n");
       arrayJogadores.splice(jogador.getCodigo(), 1);
       jogadorNowCodigo = jogadorNowCodigo + 1;
       createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
@@ -176,7 +181,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
   // verificar se todos jogadores perderam
   if (arrayJogadores.length == 0) {
-    console.log('Todos os jogadores perderam!');
+    console.log('Todos os jogadores perderam!\n');
     return;
   }
 
@@ -187,7 +192,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   }
 
   // Faz as perguntas do que o jogador quer jogar
-  rl.question("Sua vez jogador" + jogadorNowCodigo + ". Qual vai ser a sua jogada?(par/impar, vermelho/preto, altos/baixos, numero(s) único(s)) ou passar? ", function (answer) {
+  rl.question("Sua vez jogador" + jogadorNowCodigo + ". Qual vai ser a sua jogada?(par/impar, vermelho/preto, altos/baixos, numero(s) único(s)) ou passar? \n", function (answer) {
 
     /* OS NUMEROS IMPARES SERÃO PRETOS E OS NUMEROS PARES SERÃO VERMELHOS */
 
@@ -348,11 +353,10 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
     } else if (answer == 'passar'){
       arrayJogadores[jogadorNowCodigo].setQttPassouJogada();
       if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() > 3){
-        console.log("Você não pode mais passar!!");
+        console.log("Você não pode mais passar!!\n");
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
       if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() <= 3){
-        console.log("O jogador "+jogadorNowCodigo+" passou a jogada!");
         jogadorNowCodigo = jogadorNowCodigo + 1;
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
@@ -399,7 +403,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         jogadorNowCodigo = jogadorNowCodigo + 1;
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       } else {
-        console.log("Você precisa entrar uma informação válida!");
+        console.log("Você precisa entrar uma informação válida!\n");
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
     }
