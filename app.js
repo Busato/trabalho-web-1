@@ -105,8 +105,12 @@ rl.write("Roleta:\n");
 
 function createJogadores() {
   rl.question("Quantos jogadores vão jogar? \n", function (answer) {
+    if (isNaN(answer)){
+      console.log("Insira um valor númerico para definir quantidade de jogadores.\n")
+      process.exit();
+    }
     if (answer <= 0){
-      console.log("Não há jogadores para iniciar o jogo.\n")
+      console.log("Insira um valor maior que zero para definir quantidade de jogadores.\n")
       process.exit();
     }
     var arrayJogadores = new Jogadores(answer);
@@ -132,7 +136,7 @@ function createRoleta(arrayJogadores) {
     if (numeroRoleta !== 0) {
       const roleta = new Roleta(numeroRoleta);
       console.log("A roleta foi iniciada.");
-      const banca = new Banca(100);
+      const banca = new Banca(3);
       console.log("Banca inicializada com " + banca.getBudget() + "\n");
       const arrayJogadoresNew = arrayJogadores.getJogadores();
       var numeroRolado;
@@ -162,11 +166,6 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
     console.log("Agora a banca tem " + banca.getBudget() + "\n");
     jogadorNowCodigo = 0;
   }
-  // verificaçoes se jogadores ou banca perderam
-  if (banca.getBudget() <= 0) {
-    console.log("A banca quebrou! Parabéns! \n");
-    return;
-  }
 
   // passar por todos os jogadores e ver se alguem perdeu, se perdeu retirar do arrayJogadoress
   for (let index = 0; index < arrayJogadores.length; index++) {
@@ -182,7 +181,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   // verificar se todos jogadores perderam
   if (arrayJogadores.length == 0) {
     console.log('Todos os jogadores perderam!\n');
-    return;
+    process.exit();
   }
 
   // É inicio da rodada
@@ -195,7 +194,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   rl.question("Sua vez jogador" + jogadorNowCodigo + ". Qual vai ser a sua jogada?(par/impar, vermelho/preto, altos/baixos, numero(s) único(s)) ou passar? \n", function (answer) {
 
     /* OS NUMEROS IMPARES SERÃO PRETOS E OS NUMEROS PARES SERÃO VERMELHOS */
-
+    // setTimeout(function() {
+    //         console.log("PASSOU-SE O TEEEEEEEEMPO! \n")
+    //     }, 2000);
     // PAR OU IMPAR
     if (answer == 'par' || answer == 'impar') {
       arrayJogadores[jogadorNowCodigo].jogada(answer);
@@ -353,7 +354,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
     } else if (answer == 'passar'){
       arrayJogadores[jogadorNowCodigo].setQttPassouJogada();
       if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() > 3){
-        console.log("Você não pode mais passar!!\n");
+        console.log("Você não pode mais passar!!\nEscolha uma opção diferente e jogue.\n");
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
       if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() <= 3){
@@ -408,6 +409,11 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
       }
     }
   });
+  // verificaçoes se jogadores ou banca perderam
+  if (banca.getBudget() <= 0) {
+    console.log("A banca quebrou! Parabéns! \n");
+    process.exit();
+  }
 }
 
 
