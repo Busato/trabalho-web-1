@@ -1,101 +1,18 @@
-/* PARA RODAR - npm install
-DEPOIS - node app.js
-*/
+const Roleta = require('./client/roleta.js');
+const Banca = require('./client/banca.js');
+const Jogadores = require('./client/jogadores.js');
+const Jogador = require('./client/jogador.js');
 
 var http = require('http');
 var readline = require('readline');
 
+// Criacao do servidor node
 http.createServer(function (req, res) {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end();
-}).listen(80);
+}).listen(8080);
 
-class Roleta {
-  constructor(numeros) {
-    // always initialize all instance properties
-    this.numeros = numeros;
-  }
-  rodada() {
-    return Math.floor(Math.random() * this.getNumero());
-  }
-  getNumero() {
-    return this.numeros;
-  }
-}
-
-class Banca {
-  constructor(budget) {
-    this.budget = budget;
-  }
-  getBudget() {
-    return this.budget;
-  }
-  setBudget(newBudget) {
-    this.budget = newBudget;
-  }
-}
-class Jogadores {
-  constructor(arraySize) {
-    this.arrayJogadores = new Array();
-    for (let index = 0; index < arraySize; index++) {
-      const jogadorBudget = 10;
-      this.arrayJogadores.push(new Jogador(jogadorBudget, index));
-      console.log("Jogador" + index + " inicializado com " + jogadorBudget + " de bugdet \n");
-    }
-  }
-
-  getJogadores() {
-    return this.arrayJogadores;
-  }
-}
-class Jogador {
-
-  constructor(budget, codigo) {
-    this.budget = budget;
-    this.codigo = codigo;
-    this.aposta = 0;
-    this.resultado ='';
-    this.qttPassouJogada = 0;
-  }
-  getBudget() {
-    return this.budget;
-  }
-  setBudget(newBudget) {
-    this.budget = newBudget;
-  }
-  getResultado() {
-    return this.resultado;
-  }
-  setResultado(newResultado) {
-    this.resultado = newResultado;
-  }
-  getAposta() {
-    return this.aposta;
-  }
-  getCodigo() {
-    return this.codigo;
-  }
-  getQttPassouJogada(){
-    return this.qttPassouJogada;
-  }
-  setQttPassouJogada(){
-    return this.qttPassouJogada++;
-  }
-  zerarQttPassouJogada(){
-    this.qttPassouJogada = 0;
-    return this.qttPassouJogada;
-  }
-  //novo
-  jogada(aposta, quantidade) {
-    if (typeof quantidade !== 'undefined') {
-      this.budget = this.budget - quantidade;
-    } else if (aposta != "passar") {
-      this.budget = this.budget - 1;
-    }
-    this.aposta = aposta;
-  }
-}
-
+// criacao da interface do terminal
 var rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -103,16 +20,22 @@ var rl = readline.createInterface({
 
 rl.write("Roleta:\n");
 
+// inicio do jogo, criacao dos jogadores
+createJogadores();
+
 function createJogadores() {
   rl.question("Quantos jogadores vão jogar? \n", function (answer) {
+    // verificacao se escreveu um numero
     if (isNaN(answer)){
       console.log("Insira um valor númerico para definir quantidade de jogadores.\n")
       process.exit();
     }
+    // verificacao se escreveu algum numero negativo
     if (answer <= 0){
       console.log("Insira um valor maior que zero para definir quantidade de jogadores.\n")
       process.exit();
     }
+    // cria o arrayJogadores com todos os jogadores e cria a roleta
     var arrayJogadores = new Jogadores(answer);
     console.log("Os jogadores foram criados");
     createRoleta(arrayJogadores);
@@ -121,25 +44,30 @@ function createJogadores() {
 
 function createRoleta(arrayJogadores) {
 
+  // Pergunta qual tipo de roleta e instacia a quantidade de numero em cada roleta
   rl.question("Qual vai ser o tipo de roleta?(1 - americana, 2 - europeia, 3 - francesa) \n", function (answer) {
     if (answer == 1) {
-      numeroRoleta = 10;
+      numeroRoleta = 37;
     } else if (answer == 2) {
-      numeroRoleta = 10;
+      numeroRoleta = 37;
     } else if (answer == 3) {
-      numeroRoleta = 10;
+      numeroRoleta = 37;
     } else {
       numeroRoleta = 0;
       console.log("Você precisa entrar uma informação válida!\n");
       createRoleta();
     }
     if (numeroRoleta !== 0) {
+      // criacao da constante roleta
       const roleta = new Roleta(numeroRoleta);
       console.log("A roleta foi iniciada.");
-      const banca = new Banca(3);
+      // criacao da constante banca
+      const banca = new Banca(1000);
       console.log("Banca inicializada com " + banca.getBudget() + "\n");
+      // criacao da constante jogadores
       const arrayJogadoresNew = arrayJogadores.getJogadores();
       var numeroRolado;
+      // Comeca a primeira jogada
       createJogada(roleta, banca, arrayJogadoresNew, 0);
     }
   });
@@ -155,10 +83,12 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
     // Diz quem ganhou e se ganhou
     for (let index = 0; index < arrayJogadores.length; index++) {
       var jogadorNow = arrayJogadores[index];
+      // verifica se jogador nao passou a jogada
       if(jogadorNow.getQttPassouJogada() == 0){
         console.log("Jogador" + jogadorNow.getCodigo() +" jogou "+jogadorNow.getAposta()+" e "+jogadorNow.getResultado () +". Tem agora " +
         + jogadorNow.getBudget() + "\n");
       }
+      // verifica se jogador passou a rodada
       if(jogadorNow.getQttPassouJogada() > 0){
         console.log("Jogador" + jogadorNow.getCodigo() + " passou esse round. \n");
       }
@@ -170,6 +100,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   // passar por todos os jogadores e ver se alguem perdeu, se perdeu retirar do arrayJogadoress
   for (let index = 0; index < arrayJogadores.length; index++) {
     var jogador = arrayJogadores[index];
+    // se o budget do jogador e menor que 0, esse jogador perdeu e sai do arrayJogadores
     if (jogador.getBudget() <= 0) {
       console.log("O jogador"+jogador.getCodigo() +" quebrou! \n");
       arrayJogadores.splice(jogador.getCodigo(), 1);
@@ -194,10 +125,8 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   rl.question("Sua vez jogador" + jogadorNowCodigo + ". Qual vai ser a sua jogada?(par/impar, vermelho/preto, altos/baixos, numero(s) único(s)) ou passar? \n", function (answer) {
 
     /* OS NUMEROS IMPARES SERÃO PRETOS E OS NUMEROS PARES SERÃO VERMELHOS */
-    // setTimeout(function() {
-    //         console.log("PASSOU-SE O TEEEEEEEEMPO! \n")
-    //     }, 2000);
-    // PAR OU IMPAR
+
+    // JOGADA PAR OU IMPAR
     if (answer == 'par' || answer == 'impar') {
       arrayJogadores[jogadorNowCodigo].jogada(answer);
       arrayJogadores[jogadorNowCodigo].zerarQttPassouJogada();
@@ -223,6 +152,8 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         banca.setBudget(banca.getBudget() + 1);
 
         arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
+
+        // O proximo jogador
         jogadorNowCodigo = jogadorNowCodigo + 1;
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
@@ -247,9 +178,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // perdeu playboy
           arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         } else {
           // ganho safadão
           arrayJogadores[jogadorNowCodigo].setResultado('ganhou');
@@ -259,9 +190,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() - 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         }
       } else {
         if (paridadeRoleta == 'Impar') {
@@ -274,9 +205,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() - 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         } else {
           // perdeu safadão
           arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
@@ -284,9 +215,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() + 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         }
       }
     }
@@ -306,9 +237,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() + 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         } else {
           // ganho safadão
           arrayJogadores[jogadorNowCodigo].setResultado('ganhou');
@@ -319,9 +250,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() - 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         }
       } else {
         if (numeroTotalRoleta > numeroRolado) {
@@ -334,9 +265,9 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() - 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         } else {
           // perdeu safadão
           arrayJogadores[jogadorNowCodigo].setResultado('perdeu');
@@ -344,12 +275,11 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           // Calcular bugdet da banca
           banca.setBudget(banca.getBudget() + 1);
 
+          // O proximo jogador
           jogadorNowCodigo = jogadorNowCodigo + 1;
           createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
-
         }
       }
-
       // PASSAR JOGADA
     } else if (answer == 'passar'){
       arrayJogadores[jogadorNowCodigo].setQttPassouJogada();
@@ -358,6 +288,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
       if(arrayJogadores[jogadorNowCodigo].getQttPassouJogada() <= 3){
+        // O proximo jogador
         jogadorNowCodigo = jogadorNowCodigo + 1;
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       }
@@ -365,6 +296,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
     // NUMEROS UNICOS e INFO INVÁLIDA
     else {
+      // verifica se todos sao numeros inteiros
       var allNumbers = answer.split(',');
       for (let index = 0; index < allNumbers.length; index++) {
         var count = 0;
@@ -373,6 +305,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
           count++;
         }
       }
+      // se forem, entra
       if (count == 0) {
         arrayJogadores[jogadorNowCodigo].jogada(allNumbers, allNumbers.length);
         arrayJogadores[jogadorNowCodigo].zerarQttPassouJogada();
@@ -389,7 +322,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
 
             // Calcular bugdet da banca
             banca.setBudget(banca.getBudget() - allNumbers.length);
-            break;a
+            break;
           } else {
             // perdeu safadão
             quantidade_perdida++;
@@ -401,6 +334,7 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
             }
           }
         }
+        // O proximo jogador
         jogadorNowCodigo = jogadorNowCodigo + 1;
         createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo);
       } else {
@@ -416,5 +350,3 @@ function createJogada(roleta, banca, arrayJogadores, jogadorNowCodigo) {
   }
 }
 
-
-createJogadores();
